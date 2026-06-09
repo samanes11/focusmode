@@ -3,12 +3,17 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import type { UserStats } from "@/types";
+import { apiSaveSession, apiGetUserStats, apiUpdateTime } from "@/lib/api";
+
+// ─── useTimer ─────────────────────────────────────────────────────────────────
 
 interface UseTimerOptions {
+  userName: string;
+  tableId: string | null;
   onComplete: (minutesStudied: number) => void;
 }
 
-export function useTimer({ onComplete }: UseTimerOptions) {
+export function useTimer({ userName, tableId, onComplete }: UseTimerOptions) {
   const [timeLeft, setTimeLeft]         = useState(25 * 60);
   const [totalTime, setTotalTime]       = useState(25 * 60);
   const [isRunning, setIsRunning]       = useState(false);
@@ -18,6 +23,8 @@ export function useTimer({ onComplete }: UseTimerOptions) {
   const startTimeRef       = useRef<number | null>(null);
   const initialTimeLeftRef = useRef<number>(0);
   const savedTimeRef       = useRef<number>(0);
+  // track elapsed minutes synced to table
+  const lastSyncedMinRef   = useRef<number>(0);
 
   const coffeePercentage = ((totalTime - timeLeft) / totalTime) * 100;
 
@@ -28,30 +35,57 @@ export function useTimer({ onComplete }: UseTimerOptions) {
     }
   }, []);
 
+  // Save session + call parent callback
+  const saveAndComplete = useCallback(
+    async (durationSeconds: number, isCompleted: boolean) => {
+      const minutes = Math.floor(durationSeconds / 60);
+      if (minutes < 1) return;
+
+      if (userName) {
+        await apiSaveSession({
+          userName,
+          tableId,
+          duration: durationSeconds,
+          isCompleted,
+          completedAt: new Date().toISOString(),
+        }).catch(() => null);
+
+        // Update session time in table member record
+        if (tableId) {
+          await apiUpdateTime(tableId, userName, minutes).catch(() => null);
+        }
+      }
+
+      onComplete(minutes);
+    },
+    [userName, tableId, onComplete]
+  );
+
   const start = useCallback(() => {
     if (isRunning) return;
     clearTimer();
     startTimeRef.current       = Date.now();
     initialTimeLeftRef.current = timeLeft;
+    lastSyncedMinRef.current   = 0;
     setIsRunning(true);
 
     const interval = setInterval(() => {
-      const elapsed    = Math.floor((Date.now() - startTimeRef.current!) / 1000);
+      const elapsed     = Math.floor((Date.now() - startTimeRef.current!) / 1000);
       const newTimeLeft = Math.max(0, initialTimeLeftRef.current - elapsed);
       setTimeLeft(newTimeLeft);
 
       if (newTimeLeft === 0) {
         clearInterval(interval);
-        intervalRef.current    = null;
-        savedTimeRef.current   = 0;
+        intervalRef.current  = null;
+        savedTimeRef.current = 0;
         setIsRunning(false);
         toast.success("بسه دیگه وقت چیل کردنه ☕");
-        onComplete(Math.floor(initialTimeLeftRef.current / 60));
+        saveAndComplete(initialTimeLeftRef.current, true);
       }
     }, 1000);
 
     intervalRef.current = interval;
-  }, [isRunning, timeLeft, clearTimer, onComplete]);
+  }, [isRunning, timeLeft, clearTimer, saveAndComplete]);
 
   const pause = useCallback(() => {
     setIsRunning(false);
@@ -62,16 +96,17 @@ export function useTimer({ onComplete }: UseTimerOptions) {
       const newTimeLeft = Math.max(0, initialTimeLeftRef.current - elapsed);
       setTimeLeft(newTimeLeft);
 
-      const timeSpent       = totalTime - newTimeLeft;
-      const unsavedMinutes  = Math.floor((timeSpent - savedTimeRef.current) / 60);
+      const timeSpent      = totalTime - newTimeLeft;
+      const unsavedSeconds = timeSpent - savedTimeRef.current;
 
-      if (unsavedMinutes >= 1) {
+      if (unsavedSeconds >= 60) {
         savedTimeRef.current = timeSpent;
-        toast.success(`${unsavedMinutes.toLocaleString("fa-IR")} دقیقه برای شما ثبت شد`);
-        onComplete(unsavedMinutes);
+        const mins = Math.floor(unsavedSeconds / 60);
+        toast.success(`${mins} دقیقه برای شما ثبت شد`);
+        saveAndComplete(unsavedSeconds, false);
       }
     }
-  }, [clearTimer, totalTime, onComplete]);
+  }, [clearTimer, totalTime, saveAndComplete]);
 
   const setDuration = useCallback((minutes: number) => {
     setSelectedTime(minutes);
@@ -87,20 +122,47 @@ export function useTimer({ onComplete }: UseTimerOptions) {
   return { timeLeft, totalTime, isRunning, selectedTime, coffeePercentage, start, pause, setDuration };
 }
 
-export function useUserStats(initial: UserStats) {
-  const [stats, setStats] = useState<UserStats>(initial);
+// ─── useUserStats ─────────────────────────────────────────────────────────────
 
+const EMPTY_STATS: UserStats = {
+  todayMinutes: 0,
+  averageDaily: 0,
+  record: 0,
+  completedSessions: 0,
+  weeklyStats: [],
+};
+
+export function useUserStats(userName: string) {
+  const [stats, setStats]       = useState<UserStats>(EMPTY_STATS);
+  const [statsLoading, setStatsLoading] = useState(false);
+
+  const fetchStats = useCallback(async () => {
+    if (!userName) return;
+    setStatsLoading(true);
+    try {
+      const data = await apiGetUserStats(userName);
+      if (data.success) setStats(data.stats);
+    } catch {
+      // silent
+    } finally {
+      setStatsLoading(false);
+    }
+  }, [userName]);
+
+  // Optimistic update when a session completes
   const addMinutes = useCallback((minutes: number) => {
-    setStats(prev => ({ ...prev, todayMinutes: prev.todayMinutes + minutes }));
+    setStats((prev) => ({ ...prev, todayMinutes: prev.todayMinutes + minutes }));
   }, []);
 
   const completeSession = useCallback((minutes: number) => {
-    setStats(prev => ({
+    setStats((prev) => ({
       ...prev,
       completedSessions: prev.completedSessions + 1,
       todayMinutes: prev.todayMinutes + minutes,
     }));
-  }, []);
+    // Re-fetch for accurate record/average after a short delay
+    setTimeout(fetchStats, 1500);
+  }, [fetchStats]);
 
-  return { stats, addMinutes, completeSession };
+  return { stats, statsLoading, fetchStats, addMinutes, completeSession };
 }

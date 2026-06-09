@@ -6,11 +6,12 @@ import type { StudyTable } from "@/types";
 
 interface TablesViewProps {
   tables: StudyTable[];
+  loading?: boolean;
   onJoin: (id: string) => void;
   onCreateClick: () => void;
 }
 
-export default function TablesView({ tables, onJoin, onCreateClick }: TablesViewProps) {
+export default function TablesView({ tables, loading, onJoin, onCreateClick }: TablesViewProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
@@ -21,7 +22,14 @@ export default function TablesView({ tables, onJoin, onCreateClick }: TablesView
         </Button>
       </div>
 
-      {tables.length === 0 ? (
+      {loading ? (
+        <Window contentbgcolor="#2d2520" contentStyle={{ padding: 20, borderRadius: 20 }}>
+          <div className="flex flex-col items-center justify-center text-center py-12 text-[#a0826d]">
+            <Icon icon="mdi:loading" className="w-[48px] h-[48px] mx-auto mb-4 opacity-50 animate-spin" />
+            <span className="text-[15px]">در حال بارگذاری میزها...</span>
+          </div>
+        </Window>
+      ) : tables.length === 0 ? (
         <Window contentbgcolor="#2d2520" contentStyle={{ padding: 20, borderRadius: 20 }}>
           <div className="flex flex-col items-center justify-center text-center py-12 text-[#a0826d]">
             <Icon icon="mdi:account-group" className="w-[64px] h-[64px] mx-auto mb-4 opacity-50" />
