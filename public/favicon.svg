@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- background -->
+  <rect width="32" height="32" rx="7" fill="#1C1108"/>
+
+  <!-- steam: 3 bars -->
+  <rect x="8.3"  y="4"   width="1.4" height="4.5" rx="0.7" fill="#D4A574" opacity="0.9"/>
+  <rect x="15.3" y="2.5" width="1.4" height="6.5" rx="0.7" fill="#D4A574" opacity="0.9"/>
+  <rect x="22.3" y="4"   width="1.4" height="4.5" rx="0.7" fill="#D4A574" opacity="0.9"/>
+
+  <!-- rim -->
+  <rect x="5" y="11" width="22" height="3.5" rx="1.75" fill="#B8864A"/>
+
+  <!-- cup outer -->
+  <path d="M5.5 14.5 L6.5 26 Q7 28 9 28 L23 28 Q25 28 25.5 26 L26.5 14.5 Z" fill="#D4A574"/>
+
+  <!-- coffee inside -->
+  <path d="M6.2 16.5 L7 26 Q7.2 27.2 9 27.2 L23 27.2 Q24.8 27.2 25 26 L25.8 16.5 Z" fill="#3D1F08"/>
+
+  <!-- coffee surface -->
+  <ellipse cx="16" cy="17.5" rx="8.5" ry="1.8" fill="#6B3A10"/>
+
+  <!-- handle outer -->
+  <path d="M25 18.5 Q29.5 18.5 29.5 21 Q29.5 23.5 25 23.5" stroke="#D4A574" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- handle inner -->
+  <path d="M25 18.5 Q29.5 18.5 29.5 21 Q29.5 23.5 25 23.5" stroke="#3D1F08" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+
+  <!-- saucer -->
+  <rect x="4" y="28.5" width="24" height="2.5" rx="1.25" fill="#B8864A"/>
+</svg>

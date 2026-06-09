@@ -62,7 +62,7 @@ export default function ActiveTable({ tableName, members, onLeave, onMemberClick
           ))}
         </div>
 
-        <Button variant="destructive" size="sm" className="w-full mt-3 rounded-2xl" onClick={onLeave}>
+        <Button size="sm" className="w-full mt-3 rounded-2xl bg-red-700 hover:bg-red-500" onClick={onLeave}>
           <Icon icon="mdi:exit-to-app" className="w-[16px] h-[16px] ml-1" />
           خروج از میز
         </Button>
