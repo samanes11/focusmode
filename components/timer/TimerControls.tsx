@@ -41,12 +41,12 @@ export default function TimerControls({ selectedTime, isRunning, onStart, onPaus
 
       {!isRunning ? (
         <Button onClick={onStart} className="w-full rounded-lg bg-yellow-700 hover:bg-yellow-600 text-white font-bold">
-          <Icon icon="qlementine-icons:play-24" className="w-[22px] h-[22px] ml-1" />
-          شروع دم‌کشیدن
+          <Icon icon="qlementine-icons:play-24" className="w-[5] h-[5] ml-1" />
+          شروع دم‌ کشیدن
         </Button>
       ) : (
-        <Button onClick={onPause} variant="secondary" className="w-full rounded-lg">
-          <Icon icon="qlementine-icons:pause-24" className="w-[22px] h-[22px] ml-1" />
+        <Button onClick={onPause} className="w-full rounded-lg bg-red-700 hover:bg-red-500">
+          <Icon icon="qlementine-icons:pause-24" className="w-[5] h-[5] ml-1" />
           استراحت
         </Button>
       )}

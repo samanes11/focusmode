@@ -139,8 +139,11 @@ export default function CoffeeFocusPage() {
           />
         }
       >
-        <MobileNav onMenuOpen={() => setDrawerOpen(true)} userName={userName} />
-
+        <MobileNav
+          onMenuOpen={() => setDrawerOpen(true)}
+          userName={userName}
+          onLogout={logout}
+        />
         <div className="flex-1 p-4 md:p-6 lg:p-8 pb-24 lg:pb-8 flex flex-wrap gap-4 content-start">
           {view === "timer" && (
             <TimerView

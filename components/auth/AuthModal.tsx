@@ -40,7 +40,7 @@ export default function AuthModal({ onSuccess }: AuthModalProps) {
   return (
     <WindowFloat
       onclose={() => {}}
-      title={mode === "login" ? "ورود" : "ثبت‌نام"}
+      title={mode === "login" ? "ورود" : "ثبت‌ نام"}
       maxWidth="340px"
       padding={24}
       contentStyle={{
