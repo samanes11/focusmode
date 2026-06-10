@@ -10,56 +10,118 @@ interface SidebarProps {
   onLogout?: () => void;
 }
 
-export default function Sidebar({
-  items,
-  activeView,
-  onNavigate,
-  userName,
-  onLogout,
-}: SidebarProps) {
+export default function Sidebar({ items, activeView, onNavigate, userName, onLogout }: SidebarProps) {
   return (
-    <>
-      <div className="p-6 border-b border-[#4a3f35]">
-        <div className="flex items-center gap-3 mb-2">
-          <UserAvatar width={30} />
-          <span className="text-[20px] font-bold text-[#d4a574]">
-            {userName ?? "کاربر"}
-          </span>
+    <div className="flex flex-col h-full" style={{ background: "#0e0b09" }}>
+
+      {/* Logo */}
+      <div className="flex items-center gap-3 px-5 pt-6 pb-4">
+        <div
+          className="w-8 h-8 rounded-[10px] flex items-center justify-center text-base flex-shrink-0"
+          style={{ background: "rgba(212,165,116,0.12)" }}
+        >
+          ☕
         </div>
-        <span className="text-[17px] font-bold text-[#d4a574]">
-          {new Date().toLocaleDateString("fa-IR")}
+        <span className="text-[15px] font-semibold tracking-wide" style={{ color: "#e8d5c0" }}>
+          Coffee Focus
         </span>
       </div>
 
-      <ul className="px-6 py-6 flex flex-col gap-1 flex-1">
-        {items.map((item) => (
-          <li key={item.key}>
-            <button
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl mb-2 transition-all w-full text-right ${
-                activeView === item.key
-                  ? "bg-[#d4a574] text-white"
-                  : "text-[#a0826d] hover:bg-[#3d3228]"
-              }`}
-              onClick={() => onNavigate(item.key)}
+      {/* User card */}
+      <div className="mx-3 mb-5">
+        <div
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <UserAvatar width={30} />
+          <div className="flex-1 min-w-0">
+            <div
+              className="text-[13px] font-medium truncate"
+              style={{ color: "#e8d5c0" }}
             >
-              <Icon icon={item.icon} className="w-5 h-5" />
-              <span className="text-[18px] font-medium">{item.label}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
+              {userName ?? "کاربر"}
+            </div>
+            <div className="text-[11px] mt-0.5" style={{ color: "rgba(160,130,109,0.65)" }}>
+              {new Date().toLocaleDateString("fa-IR")}
+            </div>
+          </div>
+        </div>
+      </div>
 
+      {/* Nav */}
+      <nav className="flex-1 px-2.5 flex flex-col gap-0.5">
+        <span
+          className="text-[10px] font-semibold tracking-widest px-2.5 pb-1 pt-1 block uppercase"
+          style={{ color: "rgba(160,130,109,0.4)" }}
+        >
+          منو
+        </span>
+
+        {items.map((item) => {
+          const isActive = activeView === item.key;
+          return (
+            <button
+              key={item.key}
+              onClick={() => onNavigate(item.key)}
+              className="relative flex items-center gap-2.5 w-full text-right px-3 py-2.5 rounded-[10px] transition-all duration-150"
+              style={{
+                background: isActive ? "rgba(212,165,116,0.1)" : "transparent",
+                border: isActive
+                  ? "1px solid rgba(212,165,116,0.18)"
+                  : "1px solid transparent",
+                color: isActive ? "#f0c892" : "rgba(160,130,109,0.7)",
+              }}
+            >
+              {isActive && (
+                <span
+                  className="absolute right-[-10px] top-1/2 -translate-y-1/2 w-[3px] h-[18px] rounded-r-sm"
+                  style={{ background: "#d4a574" }}
+                />
+              )}
+              <Icon
+                icon={item.icon}
+                className="w-4 h-4 flex-shrink-0"
+                style={{ color: isActive ? "#f0c892" : "rgba(160,130,109,0.6)" }}
+              />
+              <span className="text-[13px] font-medium">{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Divider */}
+      <div className="mx-3 my-2" style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
+
+      {/* Logout */}
       {onLogout && (
-        <div className="px-6 pb-6">
+        <div className="p-3">
           <button
             onClick={onLogout}
-            className="flex items-center gap-2 px-4 py-3 rounded-xl w-full text-right text-[#a0826d] hover:bg-[#3d3228] transition-all"
+            className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-[10px] transition-all duration-150 text-[13px] font-medium"
+            style={{
+              background: "transparent",
+              border: "1px solid transparent",
+              color: "rgba(160,130,109,0.5)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(220,60,60,0.08)";
+              (e.currentTarget as HTMLElement).style.color = "#e07070";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(220,60,60,0.12)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "transparent";
+              (e.currentTarget as HTMLElement).style.color = "rgba(160,130,109,0.5)";
+              (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+            }}
           >
-            <Icon icon="mdi:logout" className="w-5 h-5" />
-            <span className="text-[16px]">خروج</span>
+            <Icon icon="mdi:logout" className="w-4 h-4 flex-shrink-0" />
+            خروج
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 }
